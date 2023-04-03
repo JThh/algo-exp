@@ -156,7 +156,10 @@ if st.button("Get WEF1+PO Allocation"):
     st.write("Stage 3 completed!")
     # Displaying the allocation
     st.write("WEF1+PO Allocation:")
-    st.write(saved_args.detach().numpy().tolist())
-    st.write(f"Estimated epsilon-WEF1: {all_max_prox}")
-    st.write(f"PO: {saved_PO}")
+    if not saved_args:
+        st.write("WEF1 not found. Rerun with more steps.")
+    else:
+        st.write(saved_args.detach().numpy().tolist())
+        st.write(f"Estimated epsilon-WEF1: {all_max_prox}")
+        st.write(f"PO: {saved_PO}")
     # st.write(f"Total utilitarian welfare: {}")
