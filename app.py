@@ -84,11 +84,11 @@ if st.button("Get WEF1+PO Allocation"):
     optimizer = Adam([ps])
     all_max_prox = torch.inf
     saved_args = None
+    saved_PO = False
     
     # Display progress bar
     with st.spinner("Running optimization..."):
         progress_bar = st.progress(0)
-        
         stop_button = st.button("Stop Optimization")
 
         for i in tqdm(range(nsteps)):
@@ -127,10 +127,25 @@ if st.button("Get WEF1+PO Allocation"):
                                 if approx != torch.inf and max_approx < approx:
                                     max_approx = approx
                 print(f"                 Approx = {max_approx}")
+                
+                if max_approx == -torch.inf:
+                    saved_args = intargs
+                    saved_PO = True
+                    for j in range(10):
+                        if torch.any(aten[j] * intps[:, j] < 0):
+                            saved_PO = False
+                            
+                    st.write("WEF1 found! Break out of the loop...")
+                    break
 
                 if max_approx != -torch.inf and all_max_prox > max_approx:
                     all_max_prox = max_approx
                     saved_args = intargs
+                    
+                    saved_PO = True
+                    for j in range(10):
+                        if torch.any(aten[j] * intps[:, j] < 0):
+                            saved_PO = False
         
             progress_bar.progress((i + 1) / nsteps)
 
@@ -141,4 +156,5 @@ if st.button("Get WEF1+PO Allocation"):
     st.write("WEF1+PO Allocation:")
     st.write(saved_args.detach().numpy().tolist())
     st.write(f"Estimated epsilon-WEF1: {all_max_prox}")
+    st.write(f"PO: {saved_PO}")
     # st.write(f"Total utilitarian welfare: {}")
