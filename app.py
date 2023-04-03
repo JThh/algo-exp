@@ -1,9 +1,10 @@
+import math
+
 import streamlit as st
 from torch.optim import Adam
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
-import ot
 import torch
 import torch.nn as nn
 
@@ -23,20 +24,17 @@ st.title("Agent-Item Preferences")
 col1, col2 = st.columns(2)
 
 with col1:
-    try:
-        n_agents = st.number_input("Enter the number of agents (2-10)", min_value=2, max_value=10, value=2)
-    except:
-        st.warning("Please enter a valid number of agents between 2 and 10")
-        n_agents = 2
+    n_agents = st.number_input("Enter the number of agents (2-10)", min_value=2, max_value=10, value=2)
 
 with col2:
-    try:
-        n_items = st.number_input("Enter the number of items (must be at least {} and a multiple of 2)".format(n_agents), min_value=n_agents, step=2, value=n_agents)
-    except:
-        st.warning("Please enter a valid number of items that is at least {} and a multiple of 2".format(n_agents))
-        n_items = n_agents
+    n_items = st.number_input("Enter the number of items (must be >= number of agents and a multiple of 2)", min_value=n_agents, value=n_agents, step=2)
+    
+if n_items < n_agents:
+    st.warning("Number of items must be greater than or equal to number of agents")
+elif n_items % 2 != 0:
+    st.warning("Number of items must be a multiple of 2")    
 
-preferences = np.concatenate((np.random.uniform(0,10,(n_agents,n_items/2)), np.random.uniform(-10,0,(n_agents,n_items/2))), axis=1)
+preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items/2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items/2)))), axis=1)
 
 # Button to upload preferences from CSV file
 uploaded_file = st.file_uploader("Upload a CSV file of preferences (optional)", type="csv")
