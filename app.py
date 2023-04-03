@@ -161,6 +161,6 @@ if st.button("Get WEF1+PO Allocation"):
         # st.write(f"PO: {saved_PO}")
     else:
         st.write(saved_args.detach().numpy().tolist())
-        st.write(f"Estimated epsilon-WEF1: {round(all_max_prox, 3)}")
+        st.write(f"Estimated epsilon-WEF1: {all_max_prox}")
         st.write(f"PO: {saved_PO}")
     # st.write(f"Total utilitarian welfare: {}")
