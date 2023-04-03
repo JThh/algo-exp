@@ -84,11 +84,20 @@ if st.button("Get WEF1+PO Allocation"):
     
     # Display progress bar
     with st.spinner("Running optimization..."):
+        progress_bar = st.progress(0)
+        
+        stop_button = st.button("Stop Optimization")
+
         for i in tqdm(range(nsteps)):
             loss = compute_loss(ps, aten, n_agents)
             loss.backward()
             optimizer.step()
             
+            if stop_button:
+                # if the stop button has been clicked, break out of the loop
+                st.warning("Optimization stopped by user")
+                break
+                    
             # Compute allocation and max approx
             if i % 1000 == 0:
                 prs = 1 - ps.sum(axis=1)
@@ -119,11 +128,13 @@ if st.button("Get WEF1+PO Allocation"):
                 all_max_prox = max_approx
                 saved_args = intargs
         
-        # progress_bar.progress((i + 1) / 10000)
+            progress_bar.progress((i + 1) / nsteps)
+
+        progress_bar.empty()
     
     st.write("Stage 3 completed: heuristics found!")
     # Displaying the allocation
     st.write("WEF1+PO Allocation:")
-    st.write(saved_args.detach().numpy().item())
+    st.write(saved_args.detach().numpy().tolist())
     st.write(f"Estimated epsilon-WEF1: {all_max_prox}")
     # st.write(f"Total utilitarian welfare: {}")
