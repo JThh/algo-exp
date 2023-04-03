@@ -5,52 +5,53 @@ from torch.optim import Adam
 from tqdm import tqdm
 
 # Stage 2: Find heuristics via Wasserstein barycenters
-def get_cost_matrix(item, prefs):
+def get_cost_matrix(item, prefs, nagents):
   # Construct cost matrix M
-  a = np.zeros((10,10))
+  a = np.zeros((nagents,nagents))
   # Populate individual allocation measures
-  for i in range(10):
+  for i in range(nagents):
     a[i][i] = 1
 
   A = a.T
 
-  envy = np.zeros((10,10,10))
-  M = np.zeros((10,10))
+  envy = np.zeros((nagents,nagents,nagents))
+  M = np.zeros((nagents,nagents,))
 
   # Get envy
-  for i in range(10):
+  for i in range(nagents):
     p = A[i]
-    for j in range(10):
-      for k in range(10):
+    for j in range(nagents):
+      for k in range(nagents):
         envy[i][j][k] = prefs[j][item] * p[k] / (k + 1) - prefs[j][item] * p[j] / (j + 1)
 
   print("Average envy for n extreme allocations", np.mean(np.sum(envy**2, axis=(1, 2))))
 
   # Get cost
-  for i in range(10):
-    for j in range(i, 10):
+  for i in range(nagents):
+    for j in range(i, nagents):
       M[j][i] = M[i][j] = np.sum((envy[i] - envy[j])**2, axis=(0, 1))
 
   M /= M.max()
   return A, M
 
-def find_barycenter(A, M, reg=1e-2, weights=np.array([0.1] * 10), numItermax=100000):
+def find_barycenter(A, M, nagents, reg=1e-2, numItermax=100000):
+  weights = np.array([1 / nagents] * nagents), 
   bary_wass = ot.bregman.barycenter(A, M, reg, weights=weights, numItermax=numItermax)
   return bary_wass
 
-def compute_loss(ps, aten):
+def compute_loss(ps, aten, nagents):
   prs = 1 - ps.sum(axis=1)
   all_ps = torch.concat([ps, prs.unsqueeze(-1)], axis=-1)
 
-  E = torch.zeros((10,10))
+  E = torch.zeros((nagents,nagents))
 
-  for j in range(10):
-    for k in range(10):
+  for j in range(nagents):
+    for k in range(nagents):
       E[j][k] = torch.max(torch.tensor([0.0]), sum(aten[j] * all_ps[:, k]) / (k + 1) - sum(aten[j] * all_ps[:, j]) / (j + 1))
 
-  V = torch.zeros(10)
+  V = torch.zeros(nagents)
 
-  for i in range(10):
+  for i in range(nagents):
     V[i] = sum(aten[i] * all_ps[:, i]) / (i + 1)
 
   reg = sum([torch.pow(_p, 2) if _p < 0.5 else torch.pow(1 - _p, 2) for _ps in all_ps for _p in _ps])

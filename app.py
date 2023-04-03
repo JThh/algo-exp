@@ -24,10 +24,10 @@ st.title("Agent-Item Preferences")
 col1, col2 = st.columns(2)
 
 with col1:
-    n_agents = st.number_input("Enter the number of agents (2-10)", min_value=2, max_value=10, value=2, step=1)
+    n_agents = st.number_input("Enter the number of agents (2-20)", min_value=2, max_value=20, value=2, step=1)
     
 with col2:
-    n_items = st.number_input("Enter the number of items (4-20, multiples of 2)", min_value=4, max_value=20, value=4, step=2)
+    n_items = st.number_input("Enter the number of items (4-40, multiples of 2)", min_value=4, max_value=40, value=4, step=2)
 
 if n_items < n_agents:
     st.warning("Number of items must be greater than or equal to the number of agents.")
@@ -36,8 +36,11 @@ if n_items < n_agents:
 if n_items % 2 != 0:
     st.warning("Number of items must be multiples of 2.")
     n_items = n_items + 2 - n_items % 2
+    
+n_agents = int(n_agents)
+n_items = int(n_items)
 
-preferences = np.concatenate((np.random.uniform(0,10,(int(n_agents), int(n_items // 2))), np.random.uniform(-10,0,(int(n_agents), int(n_items // 2)))), axis=1)
+preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items / 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items / 2)))), axis=1)
 
 # Button to upload preferences from CSV file
 uploaded_file = st.file_uploader("Upload a CSV file of preferences (optional)", type="csv")
@@ -54,16 +57,16 @@ if uploaded_file is not None:
 # Button to generate random preferences
 if st.button("Regenerate random preferences"):
     # Generating a table of random preferences
-    preferences = np.concatenate((np.random.uniform(0,10,(10,10)), np.random.uniform(-10,0,(10,10))), axis=1)
+    preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items / 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items / 2)))), axis=1)
     # Displaying the preferences table
     st.write("Randomly generated preferences:")
     st.write(preferences)
 
 # Get heuristics
-heurs = np.zeros((20,10))
-for i in range(20):
-  A, M = get_cost_matrix(i, preferences)
-  heurs[i] = find_barycenter(A, M)
+heurs = np.zeros((n_items,n_agents))
+for i in range(n_items):
+  A, M = get_cost_matrix(i, preferences, n_agents)
+  heurs[i] = find_barycenter(A, M, n_agents)
 
 # Display completion message
 st.write("Stage 2 completed: heuristics found!")
@@ -71,7 +74,7 @@ st.write("Stage 2 completed: heuristics found!")
 # Set up optimization
 ps = nn.Parameter(torch.from_numpy(heurs[:,:-1]))
 aten = torch.from_numpy(preferences).requires_grad_(False)
-nsteps = st.slider("Select number of optimization steps", 1000, 50000, 10000)
+nsteps = st.slider("Select number of optimization steps", 2000, 50000, 10000)
 
 # Button to get WEF1+PO Allocation
 if st.button("Get WEF1+PO Allocation"):
@@ -82,7 +85,7 @@ if st.button("Get WEF1+PO Allocation"):
     # Display progress bar
     with st.spinner("Running optimization..."):
         for i in tqdm(range(nsteps)):
-            loss = compute_loss(ps)
+            loss = compute_loss(ps, aten, n_agents)
             loss.backward()
             optimizer.step()
             
@@ -93,18 +96,18 @@ if st.button("Get WEF1+PO Allocation"):
                 intargs = torch.argmax(all_ps,axis=1)
                 intps = torch.zeros(all_ps.shape)
 
-                for i in range(20):
+                for i in range(n_items):
                     intps[i][intargs[i]] = 1
 
-                intE = torch.zeros((10,10))
+                intE = torch.zeros((n_agents,n_agents))
 
-                for j in range(10):
-                    for k in range(10):
+                for j in range(n_agents):
+                    for k in range(n_agents):
                         intE[j][k] = torch.max(torch.tensor([0.0]), sum(aten[j] * intps[:, k]) / (k + 1) - sum(aten[j] * intps[:, j]) / (j + 1))
 
             max_approx = -torch.inf
-            for i in range(10):
-                for j in range(10):
+            for i in range(n_agents):
+                for j in range(n_agents):
                     if intE[i][j] > 0:
                         if max(aten[i] * intps[:, j]) / (j + 1) < intE[i][j]:
                             approx = intE[i][j] / (max(aten[i] * intps[:, j]) / (j + 1))
