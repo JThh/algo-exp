@@ -60,7 +60,8 @@ if st.button("Regenerate random preferences"):
     preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items / 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items / 2)))), axis=1)
     # Displaying the preferences table
     st.write("Randomly generated preferences:")
-    st.write(preferences)
+
+st.write(preferences)
 
 # Get heuristics
 heurs = np.zeros((n_items,n_agents))
