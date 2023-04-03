@@ -91,7 +91,7 @@ if st.button("Get WEF1+PO Allocation"):
         progress_bar = st.progress(0)
         stop_button = st.button("Stop Optimization")
 
-        for i in tqdm(range(nsteps)):
+        for step in tqdm(range(nsteps)):
             loss = compute_loss(ps, aten, n_agents, alpha)
             loss.backward()
             optimizer.step()
@@ -102,7 +102,7 @@ if st.button("Get WEF1+PO Allocation"):
                 break
                     
             # Compute allocation and max approx
-            if i % 1000 == 0:
+            if step % 1000 == 0:
                 print("loss",loss)
                 prs = 1 - ps.sum(axis=1)
                 all_ps = torch.cat([ps, prs.unsqueeze(-1)], axis=-1)
