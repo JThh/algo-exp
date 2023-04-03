@@ -128,25 +128,27 @@ if st.button("Get WEF1+PO Allocation"):
                                     max_approx = approx
                 print(f"                 Approx = {max_approx}")
                 
-                if max_approx == -torch.inf:
-                    saved_args = intargs
-                    saved_PO = True
-                    for j in range(10):
-                        if torch.any(aten[j] * intps[:, j] < 0, 0):
-                            saved_PO = False
+                # if max_approx == -torch.inf:
+                #     saved_args = intargs
+                #     saved_PO = True
+                #     for j in range(10):
+                #         if torch.any(aten[j] * intps[:, j] < 0, 0):
+                #             saved_PO = False
                             
-                    st.write("WEF1 found! Break out of the loop...")
-                    break
+                #     st.write("WEF1 found! Break out of the loop...")
+                #     break
 
                 if max_approx != -torch.inf and all_max_prox > max_approx:
                     all_max_prox = max_approx
                     saved_args = intargs
                     
                     saved_PO = True
-                    for j in range(10):
-                        if torch.any(aten[j] * intps[:, j] < 0, 0):
-                            saved_PO = False
-        
+                    for j in range(n_agents):
+                        for i in range(n_items):
+                            if aten[j, i] * intps[i, j] < 0:
+                                if torch.any(aten[:,i] > 0):
+                                    saved_PO = False
+
             progress_bar.progress((i + 1) / nsteps)
 
         progress_bar.empty()
