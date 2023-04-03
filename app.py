@@ -128,7 +128,7 @@ if st.button("Get WEF1+PO Allocation"):
                                     max_approx = approx
                 print(f"                 Approx = {max_approx}")
 
-                if all_max_prox > max_approx:
+                if max_approx != -torch.inf and all_max_prox > max_approx:
                     all_max_prox = max_approx
                     saved_args = intargs
         
