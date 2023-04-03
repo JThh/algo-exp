@@ -103,6 +103,7 @@ if st.button("Get WEF1+PO Allocation"):
                     
             # Compute allocation and max approx
             if i % 1000 == 0:
+                print("loss",loss)
                 prs = 1 - ps.sum(axis=1)
                 all_ps = torch.cat([ps, prs.unsqueeze(-1)], axis=-1)
                 intargs = torch.argmax(all_ps,axis=1)
@@ -135,7 +136,7 @@ if st.button("Get WEF1+PO Allocation"):
 
         progress_bar.empty()
     
-    st.write("Stage 3 completed: heuristics found!")
+    st.write("Stage 3 completed!")
     # Displaying the allocation
     st.write("WEF1+PO Allocation:")
     st.write(saved_args.detach().numpy().tolist())
