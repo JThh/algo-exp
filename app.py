@@ -1,6 +1,13 @@
 import streamlit as st
+from torch.optim import Adam
+from tqdm import tqdm
 import numpy as np
 import pandas as pd
+import ot
+import torch
+import torch.nn as nn
+
+from utils import *
 
 # Setting the page title
 st.set_page_config(page_title="Agent-Item Preferences", page_icon=":clipboard:")
@@ -23,9 +30,9 @@ with col2:
 uploaded_file = st.file_uploader("Upload a CSV file of preferences (optional)", type="csv")
 if uploaded_file is not None:
     # Reading the CSV file into a pandas DataFrame
-    preferences_df = pd.read_csv(uploaded_file, header=None)
+    preferences = pd.read_csv(uploaded_file, header=None).to_numpy()
     # Checking if the DataFrame conforms to the expected size
-    if preferences_df.shape != (n_agents, n_items):
+    if preferences.shape != (n_agents, n_items):
         st.warning(f"The uploaded file does not have the expected size ({n_agents} rows x {n_items} columns).")
 
 # Button to generate random preferences
@@ -36,12 +43,68 @@ if st.button("Generate random preferences"):
     st.write("Randomly generated preferences:")
     st.write(preferences)
 
+# Get heuristics
+heurs = np.zeros((20,10))
+for i in range(20):
+  A, M = get_cost_matrix(i, preferences)
+  heurs[i] = find_barycenter(A, M)
+
+# Display completion message
+st.write("Stage 2 completed: heuristics found!")
+
+# Set up optimization
+ps = nn.Parameter(torch.from_numpy(heurs[:,:-1]))
+aten = torch.from_numpy(preferences).requires_grad_(False)
+nsteps = st.slider("Select number of optimization steps", 1000, 50000, 10000)
+
 # Button to get WEF1+PO Allocation
 if st.button("Get WEF1+PO Allocation"):
-    # Showing a progress bar
-    progress_bar = st.progress(0)
-    for i in range(10000):
-        progress_bar.progress((i + 1) / 10000)
+    optimizer = Adam([ps])
+    all_max_prox = torch.inf
+    saved_args = None
+    
+    # Display progress bar
+    with st.spinner("Running optimization..."):
+        for i in tqdm(range(nsteps)):
+            loss = compute_loss(ps)
+            loss.backward()
+            optimizer.step()
+            
+            # Compute allocation and max approx
+            if i % 1000 == 0:
+                prs = 1 - ps.sum(axis=1)
+                all_ps = torch.cat([ps, prs.unsqueeze(-1)], axis=-1)
+                intargs = torch.argmax(all_ps,axis=1)
+                intps = torch.zeros(all_ps.shape)
+
+                for i in range(20):
+                    intps[i][intargs[i]] = 1
+
+                intE = torch.zeros((10,10))
+
+                for j in range(10):
+                    for k in range(10):
+                        intE[j][k] = torch.max(torch.tensor([0.0]), sum(aten[j] * intps[:, k]) / (k + 1) - sum(aten[j] * intps[:, j]) / (j + 1))
+
+            max_approx = -torch.inf
+            for i in range(10):
+                for j in range(10):
+                    if intE[i][j] > 0:
+                        if max(aten[i] * intps[:, j]) / (j + 1) < intE[i][j]:
+                            approx = intE[i][j] / (max(aten[i] * intps[:, j]) / (j + 1))
+                            if approx != torch.inf and max_approx < approx:
+                                max_approx = approx
+                    print(f"                 Approx = {max_approx}")
+
+            if all_max_prox > max_approx:
+                all_max_prox = max_approx
+                saved_args = intargs
+        
+        # progress_bar.progress((i + 1) / 10000)
+    
+    st.write("Stage 3 completed: heuristics found!")
     # Displaying the allocation
     st.write("WEF1+PO Allocation:")
-    st.write("To be implemented...")
+    st.write(saved_args.detach().numpy().item())
+    st.write(f"Estimated epsilon-WEF1: {all_max_prox}")
+    # st.write(f"Total utilitarian welfare: {}")
