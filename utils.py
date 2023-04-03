@@ -40,7 +40,7 @@ def find_barycenter(A, M, reg=1e-2, numItermax=100000):
   bary_wass = ot.bregman.barycenter(A, M, reg, weights=weights, numItermax=numItermax)
   return bary_wass
 
-def compute_loss(ps, aten, nagents):
+def compute_loss(ps, aten, nagents, alpha=0.01):
   prs = 1 - ps.sum(axis=1)
   all_ps = torch.concat([ps, prs.unsqueeze(-1)], axis=-1)
 
@@ -57,7 +57,7 @@ def compute_loss(ps, aten, nagents):
 
   reg = sum([torch.pow(_p, 2) if _p < 0.5 else torch.pow(1 - _p, 2) for _ps in all_ps for _p in _ps])
 
-  J = - sum(V)**2 + reg  # Only for PO
+  J = torch.sum(E**2,axis=[0,1]) - alpha * sum(V)**2 + reg  # Only for PO
 
   return J
 
