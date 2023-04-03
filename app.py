@@ -26,7 +26,7 @@ with col1:
 with col2:
     n_items = st.number_input("Enter the number of items (2-20)", min_value=2, max_value=20, value=2)
 
-preferences = np.random.uniform(-10, 10, size=(n_agents, n_items))
+preferences = np.concatenate((np.random.uniform(0,10,(10,10)), np.random.uniform(-10,0,(10,10))), axis=1)
 
 # Button to upload preferences from CSV file
 uploaded_file = st.file_uploader("Upload a CSV file of preferences (optional)", type="csv")
@@ -36,12 +36,14 @@ if uploaded_file is not None:
     # Checking if the DataFrame conforms to the expected size
     if preferences.shape != (n_agents, n_items):
         st.warning(f"The uploaded file does not have the expected size ({n_agents} rows x {n_items} columns).")
+    # Checking if the DataFrame has positive or negative utilities for all agents
+    elif not np.all(np.logical_or(preferences >= 0, preferences <= 0)):
+        st.warning("The uploaded file must have either positive or negative utilities for all agents.")
 
 # Button to generate random preferences
 if st.button("Regenerate random preferences"):
     # Generating a table of random preferences
-    preferences = np.random.uniform(-10, 10, size=(n_agents, n_items))
-
+    preferences = np.concatenate((np.random.uniform(0,10,(10,10)), np.random.uniform(-10,0,(10,10))), axis=1)
     # Displaying the preferences table
     st.write("Randomly generated preferences:")
     st.write(preferences)
