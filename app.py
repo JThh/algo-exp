@@ -131,7 +131,7 @@ if st.button("Get WEF1+PO Allocation"):
                     all_max_prox = max_approx
                     saved_args = intargs
         
-                progress_bar.progress((i + 1) / nsteps)
+            progress_bar.progress((i + 1) / nsteps)
 
         progress_bar.empty()
     
