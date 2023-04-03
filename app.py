@@ -141,15 +141,14 @@ if st.button("Get WEF1+PO Allocation"):
                 if max_approx != -torch.inf and all_max_prox > max_approx:
                     all_max_prox = max_approx
                     saved_args = intargs
-                    
                     saved_PO = True
                     for j in range(n_agents):
                         for i in range(n_items):
                             if aten[j, i] * intps[i, j] < 0:
-                                if torch.any(aten[:,i] > 0):
+                                if torch.any(aten[:,i] >= 0):
                                     saved_PO = False
 
-            progress_bar.progress((i + 1) / nsteps)
+            progress_bar.progress((step + 1) / nsteps)
 
         progress_bar.empty()
     
