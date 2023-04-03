@@ -24,7 +24,7 @@ col1, col2 = st.columns(2)
 with col1:
     n_agents = st.number_input("Enter the number of agents (2-10)", min_value=2, max_value=10, value=2)
 with col2:
-    n_items = st.number_input("Enter the number of items (2-20)", min_value=2, max_value=20, value=2)
+    n_items = st.number_input("Enter the number of items (2-20)", min_value=n_agents, max_value=20, value=2)
 
 preferences = np.concatenate((np.random.uniform(0,10,(10,10)), np.random.uniform(-10,0,(10,10))), axis=1)
 
