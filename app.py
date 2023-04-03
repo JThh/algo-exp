@@ -34,7 +34,7 @@ if n_items < n_agents:
 elif n_items % 2 != 0:
     st.warning("Number of items must be a multiple of 2")    
 
-preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items / 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items / 2)))), axis=1)
+preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items // 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items // 2)))), axis=1)
 
 # Button to upload preferences from CSV file
 uploaded_file = st.file_uploader("Upload a CSV file of preferences (optional)", type="csv")
