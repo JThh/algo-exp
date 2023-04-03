@@ -24,17 +24,20 @@ st.title("Agent-Item Preferences")
 col1, col2 = st.columns(2)
 
 with col1:
-    n_agents = st.number_input("Enter the number of agents (2-10)", min_value=2, max_value=10, value=2)
-
+    n_agents = st.number_input("Enter the number of agents (2-10)", min_value=2, max_value=10, value=2, step=1)
+    
 with col2:
-    n_items = st.number_input("Enter the number of agents (2-10)", min_value=4, max_value=20, value=4)
+    n_items = st.number_input("Enter the number of items (4-20, multiples of 2)", min_value=4, max_value=20, value=4, step=2)
 
 if n_items < n_agents:
-    st.warning("Number of items must be greater than or equal to number of agents")
-elif n_items % 2 != 0:
-    st.warning("Number of items must be a multiple of 2")    
+    st.warning("Number of items must be greater than or equal to the number of agents.")
+    n_items = n_agents * 2
+    
+if n_items % 2 != 0:
+    st.warning("Number of items must be multiples of 2.")
+    n_items = n_items + 2 - n_items % 2
 
-preferences = np.concatenate((np.random.uniform(0,10,(n_agents, n_items // 2)), np.random.uniform(-10,0,(n_agents, n_items // 2))), axis=1)
+preferences = np.concatenate((np.random.uniform(0,10,(n_agents, int(n_items // 2))), np.random.uniform(-10,0,(n_agents, int(n_items // 2)))), axis=1)
 
 # Button to upload preferences from CSV file
 uploaded_file = st.file_uploader("Upload a CSV file of preferences (optional)", type="csv")
