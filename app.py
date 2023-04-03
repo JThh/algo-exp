@@ -132,7 +132,7 @@ if st.button("Get WEF1+PO Allocation"):
                     saved_args = intargs
                     saved_PO = True
                     for j in range(10):
-                        if torch.any(aten[j] * intps[:, j] < 0):
+                        if torch.any(aten[j] * intps[:, j] < 0, 0):
                             saved_PO = False
                             
                     st.write("WEF1 found! Break out of the loop...")
@@ -144,7 +144,7 @@ if st.button("Get WEF1+PO Allocation"):
                     
                     saved_PO = True
                     for j in range(10):
-                        if torch.any(aten[j] * intps[:, j] < 0):
+                        if torch.any(aten[j] * intps[:, j] < 0, 0):
                             saved_PO = False
         
             progress_bar.progress((i + 1) / nsteps)
