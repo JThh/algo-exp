@@ -76,7 +76,7 @@ st.write("Stage 2 completed: heuristics found!")
 ps = nn.Parameter(torch.from_numpy(heurs[:,:-1]))
 aten = torch.from_numpy(preferences).requires_grad_(False)
 nsteps = st.slider("Select number of optimization steps", 2000, 50000, 10000)
-alpha = st.slider('Choose an alpha value', min_value=0.0, max_value=1.0, value=0.5, step=0.01)
+alpha = st.slider('Choose an alpha value', min_value=0.0, max_value=1.0, value=0.01, step=0.01)
 st.write('Selected alpha:', alpha)
 
 # Button to get WEF1+PO Allocation
