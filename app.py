@@ -66,7 +66,7 @@ if st.button("Regenerate random preferences"):
 heurs = np.zeros((n_items,n_agents))
 for i in range(n_items):
   A, M = get_cost_matrix(i, preferences, n_agents)
-  heurs[i] = find_barycenter(A, M, n_agents)
+  heurs[i] = find_barycenter(A, M)
 
 # Display completion message
 st.write("Stage 2 completed: heuristics found!")
