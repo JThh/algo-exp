@@ -57,11 +57,12 @@ def compute_loss(ps, aten, nagents, alpha=0.01):
 
   reg = sum([torch.pow(_p, 2) if _p < 0.5 else torch.pow(1 - _p, 2) for _ps in all_ps for _p in _ps])
 
-  J = torch.sum(E**2,axis=[0,1]) - alpha * sum(V)**2 + reg  # Only for PO
+  J = torch.sum(E**2,axis=[0,1]) + alpha * sum(V)**2 + reg  # Only for PO
 
   return J
 
 def train(params, aten, nsteps=10000):
+  # For 10x20 cases
   optimizer = Adam([params])
   all_max_prox = torch.inf
   saved_args = None

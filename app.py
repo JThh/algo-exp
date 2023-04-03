@@ -117,21 +117,21 @@ if st.button("Get WEF1+PO Allocation"):
                     for k in range(n_agents):
                         intE[j][k] = torch.max(torch.tensor([0.0]), sum(aten[j] * intps[:, k]) / (k + 1) - sum(aten[j] * intps[:, j]) / (j + 1))
 
-            max_approx = -torch.inf
-            for i in range(n_agents):
-                for j in range(n_agents):
-                    if intE[i][j] > 0:
-                        if max(aten[i] * intps[:, j]) / (j + 1) < intE[i][j]:
-                            approx = intE[i][j] / (max(aten[i] * intps[:, j]) / (j + 1))
-                            if approx != torch.inf and max_approx < approx:
-                                max_approx = approx
-                    print(f"                 Approx = {max_approx}")
+                max_approx = -torch.inf
+                for i in range(n_agents):
+                    for j in range(n_agents):
+                        if intE[i][j] > 0:
+                            if max(aten[i] * intps[:, j]) / (j + 1) < intE[i][j]:
+                                approx = intE[i][j] / (max(aten[i] * intps[:, j]) / (j + 1))
+                                if approx != torch.inf and max_approx < approx:
+                                    max_approx = approx
+                print(f"                 Approx = {max_approx}")
 
-            if all_max_prox > max_approx:
-                all_max_prox = max_approx
-                saved_args = intargs
+                if all_max_prox > max_approx:
+                    all_max_prox = max_approx
+                    saved_args = intargs
         
-            progress_bar.progress((i + 1) / nsteps)
+                progress_bar.progress((i + 1) / nsteps)
 
         progress_bar.empty()
     
