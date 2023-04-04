@@ -61,6 +61,24 @@ def compute_loss(ps, aten, nagents, alpha=0.01):
 
   return J
 
+def get_WEF1(intps, n_agents, aten):
+    intE = torch.zeros((n_agents,n_agents), requires_grad=False)
+
+    for j in range(n_agents):
+        for k in range(n_agents):
+            intE[j][k] = torch.max(torch.tensor([0.0]), sum(aten[j] * intps[:, k]) / (k + 1) - sum(aten[j] * intps[:, j]) / (j + 1))
+
+    max_approx = -torch.inf
+    for i in range(n_agents):
+        for j in range(n_agents):
+            if intE[i][j] > 0:
+                if max(aten[i] * intps[:, j]) / (j + 1) < intE[i][j]:
+                    approx = intE[i][j] / (max(aten[i] * intps[:, j]) / (j + 1))
+                    if approx != torch.inf and max_approx < approx:
+                        max_approx = approx
+    # print(f"                 Approx = {max_approx}")
+    return max_approx
+
 def train(params, aten, nsteps=10000):
   # For 10x20 cases
   optimizer = Adam([params])

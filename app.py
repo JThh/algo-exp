@@ -79,6 +79,13 @@ nsteps = st.slider("Select number of optimization steps", 2000, 50000, 10000)
 alpha = st.slider('Choose an alpha value', min_value=0.0, max_value=1.0, value=0.01, step=0.01)
 st.write('Selected alpha:', alpha)
 
+if st.button("Get Heuristic Allocation"):
+    heur_intargs = torch.argmax(heurs,axis=1)
+    heur_intps = torch.zeros(heur_intargs.shape, requires_grad=False)
+    for i in range(n_items):
+        heur_intps[i][heur_intargs[i]] = 1
+    st.write(f"Heuristic allocation: {get_WEF1(heur_intps, n_agents, aten)}")
+
 # Button to get WEF1+PO Allocation
 if st.button("Get WEF1+PO Allocation"):
     optimizer = Adam([ps])
@@ -106,28 +113,13 @@ if st.button("Get WEF1+PO Allocation"):
                 print("loss",loss)
                 prs = 1 - ps.sum(axis=1)
                 all_ps = torch.cat([ps, prs.unsqueeze(-1)], axis=-1)
-                intargs = torch.argmax(all_ps,axis=1)
-                intps = torch.zeros(all_ps.shape)
-
+                intargs = torch.argmax(all_ps, axis=1)
+                intps = torch.zeros(intargs.shape, requires_grad=False)
                 for i in range(n_items):
                     intps[i][intargs[i]] = 1
-
-                intE = torch.zeros((n_agents,n_agents))
-
-                for j in range(n_agents):
-                    for k in range(n_agents):
-                        intE[j][k] = torch.max(torch.tensor([0.0]), sum(aten[j] * intps[:, k]) / (k + 1) - sum(aten[j] * intps[:, j]) / (j + 1))
-
-                max_approx = -torch.inf
-                for i in range(n_agents):
-                    for j in range(n_agents):
-                        if intE[i][j] > 0:
-                            if max(aten[i] * intps[:, j]) / (j + 1) < intE[i][j]:
-                                approx = intE[i][j] / (max(aten[i] * intps[:, j]) / (j + 1))
-                                if approx != torch.inf and max_approx < approx:
-                                    max_approx = approx
+                max_approx = get_WEF1(intps, n_agents, aten)
                 print(f"                 Approx = {max_approx}")
-                
+
                 # if max_approx == -torch.inf:
                 #     saved_args = intargs
                 #     saved_PO = True
