@@ -46,6 +46,8 @@ n_items = int(n_items)
 # if random_seed:
 #     np.random.seed(random_seed)
 
+np.random.seed(42)
+
 preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items / 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items / 2)))), axis=1)
 
 # Button to upload preferences from CSV file
