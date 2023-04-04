@@ -96,7 +96,7 @@ if st.button("Get Heuristic Allocation"):
 
 # Set up optimization
 ps = nn.Parameter(torch.from_numpy(heurs[:,:-1]))
-nsteps = st.slider("Select number of optimization steps", 2000, 50000, 10000)
+nsteps = st.slider("Select number of optimization steps", 2000, 50000, 5000)
 alpha = st.slider('Choose an alpha value', min_value=0.0, max_value=1.0, value=0.01, step=0.01)
 st.write('Selected alpha:', alpha)
 
