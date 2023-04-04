@@ -126,8 +126,8 @@ if st.button("Get WEF1+PO Allocation"):
                 break
                     
             # Compute allocation and max approx
-            if step % 1000 == 0:
-                print("loss",loss)
+            if step % 100 == 0:
+                # print("loss",loss)
                 prs = 1 - ps.sum(axis=1)
                 all_ps = torch.cat([ps, prs.unsqueeze(-1)], axis=-1)
                 intargs = torch.argmax(all_ps, axis=1)
@@ -135,27 +135,18 @@ if st.button("Get WEF1+PO Allocation"):
                 for i in range(n_items):
                     intps[i][intargs[i]] = 1
                 max_approx = get_WEF1(intps, n_agents, aten)
-                print(f"                 Approx = {max_approx}")
+                # print(f"                 Approx = {max_approx}")
 
-                # if max_approx == -torch.inf:
-                #     saved_args = intargs
-                #     saved_PO = True
-                #     for j in range(10):
-                #         if torch.any(aten[j] * intps[:, j] < 0, 0):
-                #             saved_PO = False
-                            
-                #     st.write("WEF1 found! Break out of the loop...")
-                #     break
+                if max_approx == 1:
+                    saved_args = intargs
+                    saved_PO = check_PO(intps, n_agents, n_items, aten)
+                    st.write("WEF1 found! Break out of the loop...")
+                    break
 
                 if max_approx != -torch.inf and all_max_prox > max_approx:
                     all_max_prox = max_approx
                     saved_args = intargs
-                    saved_PO = True
-                    for j in range(n_agents):
-                        for i in range(n_items):
-                            if aten[j, i] * intps[i, j] < 0:
-                                if torch.any(aten[:,i] >= 0):
-                                    saved_PO = False
+                    saved_PO = check_PO(intps, n_agents, n_items, aten)
 
             progress_bar.progress((step + 1) / nsteps)
 

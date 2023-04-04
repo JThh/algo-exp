@@ -80,3 +80,14 @@ def get_WEF1(intps, n_agents, aten, is_heur=True):
     if is_heur and max_approx == -torch.inf:
         return 1.00 
     return max_approx
+
+
+def check_PO(intps, n_agents, n_items, aten):
+    saved_PO = True
+    for j in range(n_agents):
+        for i in range(n_items):
+            if aten[j, i] * intps[i, j] < 0:
+                if torch.any(aten[:,i] >= 0):
+                    saved_PO = False
+
+    return saved_PO
