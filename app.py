@@ -84,7 +84,7 @@ if st.button("Get Heuristic Allocation"):
     heur_intps = torch.zeros(heurs.shape, requires_grad=False)
     for i in range(n_items):
         heur_intps[i][heur_intargs[i]] = 1
-    st.write(f"Heuristic allocation: {get_WEF1(heur_intps, n_agents, aten)}")
+    st.write(f"Heuristic allocation: {get_WEF1(heur_intps, n_agents, aten)}-WEF1")
 
 # Set up optimization
 ps = nn.Parameter(torch.from_numpy(heurs[:,:-1]))
