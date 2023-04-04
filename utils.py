@@ -36,7 +36,7 @@ def get_cost_matrix(item, prefs, nagents):
 
 def find_barycenter(A, M, reg=1e-2, numItermax=100000):
   weights = np.array([1 / A.shape[1]] * A.shape[1])
-  print(A.shape[1], weights)
+#   print(A.shape[1], weights)
   bary_wass = ot.bregman.barycenter(A, M, reg, weights=weights, numItermax=numItermax)
   return bary_wass
 

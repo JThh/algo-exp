@@ -126,7 +126,7 @@ if st.button("Get WEF1+PO Allocation"):
                 break
                     
             # Compute allocation and max approx
-            if step % 1000 == 0:
+            if step % 100 == 0:
                 print("loss",loss)
                 prs = 1 - ps.sum(axis=1)
                 all_ps = torch.cat([ps, prs.unsqueeze(-1)], axis=-1)
