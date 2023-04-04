@@ -72,19 +72,19 @@ for i in range(n_items):
 # Display completion message
 st.write("Stage 2 completed: heuristics found!")
 
-# Set up optimization
-ps = nn.Parameter(torch.from_numpy(heurs[:,:-1]))
-aten = torch.from_numpy(preferences).requires_grad_(False)
-nsteps = st.slider("Select number of optimization steps", 2000, 50000, 10000)
-alpha = st.slider('Choose an alpha value', min_value=0.0, max_value=1.0, value=0.01, step=0.01)
-st.write('Selected alpha:', alpha)
-
 if st.button("Get Heuristic Allocation"):
     heur_intargs = torch.argmax(torch.from_numpy(heurs),axis=1)
     heur_intps = torch.zeros(heur_intargs.shape, requires_grad=False)
     for i in range(n_items):
         heur_intps[i][heur_intargs[i]] = 1
     st.write(f"Heuristic allocation: {get_WEF1(heur_intps, n_agents, aten)}")
+
+# Set up optimization
+ps = nn.Parameter(torch.from_numpy(heurs[:,:-1]))
+aten = torch.from_numpy(preferences).requires_grad_(False)
+nsteps = st.slider("Select number of optimization steps", 2000, 50000, 10000)
+alpha = st.slider('Choose an alpha value', min_value=0.0, max_value=1.0, value=0.01, step=0.01)
+st.write('Selected alpha:', alpha)
 
 # Button to get WEF1+PO Allocation
 if st.button("Get WEF1+PO Allocation"):
