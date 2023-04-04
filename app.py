@@ -80,7 +80,7 @@ alpha = st.slider('Choose an alpha value', min_value=0.0, max_value=1.0, value=0
 st.write('Selected alpha:', alpha)
 
 if st.button("Get Heuristic Allocation"):
-    heur_intargs = torch.argmax(heurs,axis=1)
+    heur_intargs = torch.argmax(torch.from_numpy(heurs),axis=1)
     heur_intps = torch.zeros(heur_intargs.shape, requires_grad=False)
     for i in range(n_items):
         heur_intps[i][heur_intargs[i]] = 1
