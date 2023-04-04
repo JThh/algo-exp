@@ -64,6 +64,7 @@ if uploaded_file is not None:
 
 # Button to generate random preferences
 if st.button("Regenerate random preferences"):
+    np.random.seed(24)
     # Generating a table of random preferences
     preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items / 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items / 2)))), axis=1)
     # Displaying the preferences table
