@@ -85,14 +85,17 @@ st.write("Stage 2 completed: heuristics found!")
 aten = torch.from_numpy(preferences).requires_grad_(False)
 
 if st.button("Get Heuristic Allocation"):
-    heur_intargs = torch.argmax(torch.from_numpy(heurs),axis=1)
-    heur_intps = torch.zeros(heurs.shape, requires_grad=False)
-    for i in range(n_items):
-        heur_intps[i][heur_intargs[i]] = 1
-    st.write(heur_intargs.numpy().tolist())
-    st.write(f"Heuristic allocation: {get_WEF1(heur_intps, n_agents, aten, is_heur=True)}-WEF1")
-    del heur_intargs 
-    del heur_intps
+    if np.nan in heurs:
+        st.write("Allocation too small. Heuristic not found.")
+    else:
+        heur_intargs = torch.argmax(torch.from_numpy(heurs),axis=1)
+        heur_intps = torch.zeros(heurs.shape, requires_grad=False)
+        for i in range(n_items):
+            heur_intps[i][heur_intargs[i]] = 1
+        st.write(heur_intargs.numpy().tolist())
+        st.write(f"Heuristic allocation: {get_WEF1(heur_intps, n_agents, aten, is_heur=True)}-WEF1")
+        del heur_intargs 
+        del heur_intps
 
 # Set up optimization
 ps = nn.Parameter(torch.from_numpy(heurs[:,:-1]))
