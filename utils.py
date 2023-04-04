@@ -61,7 +61,7 @@ def compute_loss(ps, aten, nagents, alpha=0.01):
 
   return J
 
-def get_WEF1(intps, n_agents, aten):
+def get_WEF1(intps, n_agents, aten, is_heur=True):
     intE = torch.zeros((n_agents, n_agents), requires_grad=False)
 
     for j in range(n_agents):
@@ -77,6 +77,6 @@ def get_WEF1(intps, n_agents, aten):
                     if approx != torch.inf and max_approx < approx:
                         max_approx = approx
     # print(f"                 Approx = {max_approx}")
-    if max_approx == -torch.inf:
+    if is_heur and max_approx == -torch.inf:
         return 1.00 
     return max_approx
