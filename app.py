@@ -10,6 +10,10 @@ import torch.nn as nn
 
 from utils import *
 
+@st.cache(allow_output_mutation=True)
+def get_random_preferences(seed):
+    np.random.seed(seed)
+
 # Setting the page title
 st.set_page_config(page_title="Agent-Item Preferences", page_icon=":clipboard:")
 
@@ -29,6 +33,7 @@ with col1:
 with col2:
     n_items = st.number_input("Enter the number of items (4-40, multiples of 2)", min_value=4, max_value=40, value=4, step=2)
 
+get_random_preferences(42)
 
 if n_items < n_agents:
     st.warning("Number of items must be greater than or equal to the number of agents.")
