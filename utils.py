@@ -55,13 +55,14 @@ def compute_loss(ps, aten, nagents, alpha=0.01):
   for i in range(nagents):
     V[i] = sum(aten[i] * all_ps[:, i]) / (i + 1)
 
-  reg = sum([torch.pow(_p, 2) if _p < 0.5 else torch.pow(1 - _p, 2) for _ps in all_ps for _p in _ps])
+  # reg = sum([torch.pow(_p, 2) if _p < 0.5 else torch.pow(1 - _p, 2) for _ps in all_ps for _p in _ps])
 
-  J = torch.sum(E**2,axis=[0,1]) + alpha * sum(V)**2 + reg
+  J = torch.sum(E**2,axis=[0,1]) + alpha * sum(V)**2 # + reg
 
   return J
 
 def get_WEF1(intps, n_agents, aten, is_heur=True):
+  with torch.no_grad():
     intE = torch.zeros((n_agents, n_agents), requires_grad=False)
 
     for j in range(n_agents):
@@ -83,6 +84,7 @@ def get_WEF1(intps, n_agents, aten, is_heur=True):
 
 
 def check_PO(intps, n_agents, n_items, aten):
+  with torch.no_grad():
     saved_PO = True
     for j in range(n_agents):
         for i in range(n_items):
