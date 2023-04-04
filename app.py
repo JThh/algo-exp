@@ -11,7 +11,7 @@ import torch.nn as nn
 from utils import *
 
 # Setting the page title
-st.set_page_config(page_title="Agent-Item Preferences", page_icon=":clipboard:", page_bg_color="#f5f5f5")
+st.set_page_config(page_title="Agent-Item Preferences", page_icon=":clipboard:")
 
 # Setting the sidebar
 st.sidebar.title("Note")
