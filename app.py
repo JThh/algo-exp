@@ -41,10 +41,10 @@ if n_items % 2 != 0:
 n_agents = int(n_agents)
 n_items = int(n_items)
 
-random_seed = st.number_input("Enter the random seed (optional)", min_value=0)
+# random_seed = st.number_input("Enter the random seed (optional)", min_value=0)
     
-if random_seed:
-    np.random.seed(random_seed)
+# if random_seed:
+#     np.random.seed(random_seed)
 
 preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items / 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items / 2)))), axis=1)
 
