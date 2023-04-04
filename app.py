@@ -74,107 +74,17 @@ if submit_button:
                     else:
                         st.write("Uploaded preferences:")
                         st.write(preferences)
+                    
+                    train(n_items, n_agents, preferences)
             else:
                 preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items / 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items / 2)))), axis=1)
                 st.write("Randomly generated preferences:")
                 st.write(preferences)
+                train(n_items, n_agents, preferences)
 
             # Button to regenerate random preferences
             if st.button("Regenerate random preferences"):
                 preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items / 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items / 2)))), axis=1)
                 st.write("Randomly generated preferences:")
                 st.write(preferences)
-
-    # Get heuristics
-    heurs = np.zeros((n_items,n_agents))
-    for i in range(n_items):
-        A, M = get_cost_matrix(i, preferences, n_agents)
-        heurs[i] = find_barycenter(A, M)
-
-    # Display completion message
-    st.write("Stage 2 completed: heuristics found!")
-    aten = torch.from_numpy(preferences).requires_grad_(False)
-
-    if st.button("Get Heuristic Allocation"):
-        heur_intargs = torch.argmax(torch.from_numpy(heurs),axis=1)
-        heur_intps = torch.zeros(heurs.shape, requires_grad=False)
-        for i in range(n_items):
-            heur_intps[i][heur_intargs[i]] = 1
-        st.write(f"Heuristic allocation: {get_WEF1(heur_intps, n_agents, aten)}")
-
-    # Set up optimization
-    ps = nn.Parameter(torch.from_numpy(heurs[:,:-1]))
-    nsteps = st.slider("Select number of optimization steps", 2000, 50000, 10000)
-    alpha = st.slider('Choose an alpha value', min_value=0.0, max_value=1.0, value=0.01, step=0.01)
-    st.write('Selected alpha:', alpha)
-
-    # Button to get WEF1+PO Allocation
-    if st.button("Get WEF1+PO Allocation"):
-        optimizer = Adam([ps])
-        all_max_prox = torch.inf
-        saved_args = None
-        saved_PO = False
-        
-        # Display progress bar
-        with st.spinner("Running optimization..."):
-            progress_bar = st.progress(0)
-            stop_button = st.button("Stop Optimization")
-
-            for step in tqdm(range(nsteps)):
-                loss = compute_loss(ps, aten, n_agents, alpha)
-                loss.backward()
-                optimizer.step()
-                
-                if stop_button:
-                    # if the stop button has been clicked, break out of the loop
-                    st.warning("Optimization stopped by user")
-                    break
-                        
-                # Compute allocation and max approx
-                if step % 1000 == 0:
-                    print("loss",loss)
-                    prs = 1 - ps.sum(axis=1)
-                    all_ps = torch.cat([ps, prs.unsqueeze(-1)], axis=-1)
-                    intargs = torch.argmax(all_ps, axis=1)
-                    intps = torch.zeros(all_ps.shape, requires_grad=False)
-                    for i in range(n_items):
-                        intps[i][intargs[i]] = 1
-                    max_approx = get_WEF1(intps, n_agents, aten)
-                    print(f"                 Approx = {max_approx}")
-
-                    # if max_approx == -torch.inf:
-                    #     saved_args = intargs
-                    #     saved_PO = True
-                    #     for j in range(10):
-                    #         if torch.any(aten[j] * intps[:, j] < 0, 0):
-                    #             saved_PO = False
-                                
-                    #     st.write("WEF1 found! Break out of the loop...")
-                    #     break
-
-                    if max_approx != -torch.inf and all_max_prox > max_approx:
-                        all_max_prox = max_approx
-                        saved_args = intargs
-                        saved_PO = True
-                        for j in range(n_agents):
-                            for i in range(n_items):
-                                if aten[j, i] * intps[i, j] < 0:
-                                    if torch.any(aten[:,i] >= 0):
-                                        saved_PO = False
-
-                progress_bar.progress((step + 1) / nsteps)
-
-            progress_bar.empty()
-        
-        st.write("Stage 3 completed!")
-        # Displaying the allocation
-        st.write("WEF1+PO Allocation:")
-        if saved_args is None:
-            st.write(intargs.detach().numpy().tolist())
-            st.write(f"Estimated epsilon-WEF1: {max_approx}")
-            # st.write(f"PO: {saved_PO}")
-        else:
-            st.write(saved_args.detach().numpy().tolist())
-            st.write(f"Estimated epsilon-WEF1: {all_max_prox}")
-            st.write(f"PO: {saved_PO}")
-        # st.write(f"Total utilitarian welfare: {}")
+                train(n_items, n_agents, preferences)
