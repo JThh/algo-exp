@@ -21,7 +21,7 @@ st.sidebar.write("This tool is only for demonstration purpose")
 st.title("Agent-Item Preferences")
 
 # Getting user inputs for number of agents and items
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 
 with col1:
     n_agents = st.number_input("Enter the number of agents (2-20)", min_value=2, max_value=20, value=2, step=1)
@@ -29,11 +29,6 @@ with col1:
 with col2:
     n_items = st.number_input("Enter the number of items (4-40, multiples of 2)", min_value=4, max_value=40, value=4, step=2)
 
-with col3:
-    random_seed = st.number_input("Enter the random seed (optional)", min_value=0)
-    
-if random_seed:
-    np.random.seed(random_seed)
 
 if n_items < n_agents:
     st.warning("Number of items must be greater than or equal to the number of agents.")
@@ -45,6 +40,11 @@ if n_items % 2 != 0:
     
 n_agents = int(n_agents)
 n_items = int(n_items)
+
+random_seed = st.number_input("Enter the random seed (optional)", min_value=0)
+    
+if random_seed:
+    np.random.seed(random_seed)
 
 preferences = np.concatenate((np.random.uniform(0,10,(n_agents, math.floor(n_items / 2))), np.random.uniform(-10,0,(n_agents, math.ceil(n_items / 2)))), axis=1)
 
